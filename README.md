@@ -1,7 +1,5 @@
 <p align="center">
   <img src="assets/logo.png" alt="Typosaurus Logo" width="120" height="120" />
-  <br />
-  <img src="assets/text-logo.png" alt="Typosaurus Wordmark" width="220" />
 </p>
 
 <h1 align="center">Typosaurus</h1>
