@@ -1,0 +1,307 @@
+@import '@fontsource/plus-jakarta-sans/400.css';
+@import '@fontsource/plus-jakarta-sans/500.css';
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+@import '@fontsource/source-code-pro/400.css';
+@import '@fontsource/source-code-pro/500.css';
+@import '@fontsource/source-code-pro/600.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="mongodb-dark"] {
+  /* Derived directly from DESIGN.md MongoDB identity */
+  --color-canvas: #001e2b;
+  --color-surface: #002b3d;
+  --color-surface-soft: #00364d;
+  --color-surface-feature: #004d66;
+  --color-hairline: #1c3d4d;
+  --color-hairline-strong: #2c5166;
+  --color-hairline-soft: #14303d;
+  --color-ink: #ffffff;
+  --color-text-muted: #879ca8;
+  --color-text-dim: #5c7482;
+  --color-primary: #00ed64;
+  --color-primary-hover: #00b545;
+  --color-primary-pressed: #008c34;
+  --color-on-primary: #001e2b;
+  --color-accent: #00ed64;
+  --color-accent-purple: #7b3ff2;
+  --color-accent-orange: #fa6e39;
+  --color-caret: #00ed64;
+  --color-error: #ff5252;
+  --color-error-bg: rgba(255, 82, 82, 0.15);
+  --color-correct: #00ed64;
+  --color-untyped: #5c7482;
+
+  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Source Code Pro', monospace, ui-monospace, SFMono-Regular;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-xxl: 24px;
+  --radius-full: 9999px;
+
+  --flow-calm: #00ed64;
+  --flow-warm: #fa6e39;
+  --flow-hot: #f06bb8;
+  --flow-blazing: #7b3ff2;
+}
+
+[data-theme="mongodb-light"] {
+  --color-canvas: #ffffff;
+  --color-surface: #f9fbfa;
+  --color-surface-soft: #f4f7f6;
+  --color-surface-feature: #e3fcef;
+  --color-hairline: #e1e5e8;
+  --color-hairline-strong: #c1ccd6;
+  --color-hairline-soft: #eceff1;
+  --color-ink: #001e2b;
+  --color-text-muted: #5c6c7a;
+  --color-text-dim: #a8b3bc;
+  --color-primary: #00684a;
+  --color-primary-hover: #008c34;
+  --color-primary-pressed: #001e2b;
+  --color-on-primary: #ffffff;
+  --color-accent: #00a35c;
+  --color-accent-purple: #7b3ff2;
+  --color-accent-orange: #fa6e39;
+  --color-caret: #00684a;
+  --color-error: #d9383a;
+  --color-error-bg: rgba(217, 56, 58, 0.12);
+  --color-correct: #00684a;
+  --color-untyped: #a8b3bc;
+
+  --flow-calm: #00684a;
+  --flow-warm: #fa6e39;
+  --flow-hot: #f06bb8;
+  --flow-blazing: #7b3ff2;
+}
+
+[data-theme="matrix-cyber"] {
+  --color-canvas: #050a06;
+  --color-surface: #0a140d;
+  --color-surface-soft: #101f14;
+  --color-surface-feature: #182e1e;
+  --color-hairline: #1a3321;
+  --color-hairline-strong: #24472e;
+  --color-hairline-soft: #122417;
+  --color-ink: #c8ffd4;
+  --color-text-muted: #4e805a;
+  --color-text-dim: #2e5237;
+  --color-primary: #00ff66;
+  --color-primary-hover: #26ff7d;
+  --color-primary-pressed: #00cc52;
+  --color-on-primary: #050a06;
+  --color-accent: #00ffff;
+  --color-accent-purple: #9d00ff;
+  --color-accent-orange: #ff9900;
+  --color-caret: #00ff66;
+  --color-error: #ff3344;
+  --color-error-bg: rgba(255, 51, 68, 0.18);
+  --color-correct: #00ff66;
+  --color-untyped: #32593c;
+
+  --flow-calm: #00ff66;
+  --flow-warm: #ffff00;
+  --flow-hot: #ff0055;
+  --flow-blazing: #00ffff;
+}
+
+[data-theme="nord-frost"] {
+  --color-canvas: #242933;
+  --color-surface: #2e3440;
+  --color-surface-soft: #3b4252;
+  --color-surface-feature: #434c5e;
+  --color-hairline: #3b4252;
+  --color-hairline-strong: #4c566a;
+  --color-hairline-soft: #2e3440;
+  --color-ink: #eceff4;
+  --color-text-muted: #d8dee9;
+  --color-text-dim: #7b88a1;
+  --color-primary: #88c0d0;
+  --color-primary-hover: #8fbcbb;
+  --color-primary-pressed: #81a1c1;
+  --color-on-primary: #2e3440;
+  --color-accent: #81a1c1;
+  --color-accent-purple: #b48ead;
+  --color-accent-orange: #d08770;
+  --color-caret: #88c0d0;
+  --color-error: #bf616a;
+  --color-error-bg: rgba(191, 97, 106, 0.18);
+  --color-correct: #a3be8c;
+  --color-untyped: #5e6b82;
+
+  --flow-calm: #88c0d0;
+  --flow-warm: #ebcb8b;
+  --flow-hot: #d08770;
+  --flow-blazing: #b48ead;
+}
+
+[data-theme="dracula"] {
+  --color-canvas: #21222c;
+  --color-surface: #282a36;
+  --color-surface-soft: #343746;
+  --color-surface-feature: #44475a;
+  --color-hairline: #44475a;
+  --color-hairline-strong: #6272a4;
+  --color-hairline-soft: #383a4c;
+  --color-ink: #f8f8f2;
+  --color-text-muted: #bd93f9;
+  --color-text-dim: #6272a4;
+  --color-primary: #50fa7b;
+  --color-primary-hover: #69ff94;
+  --color-primary-pressed: #3bd663;
+  --color-on-primary: #282a36;
+  --color-accent: #ff79c6;
+  --color-accent-purple: #bd93f9;
+  --color-accent-orange: #ffb86c;
+  --color-caret: #f1fa8c;
+  --color-error: #ff5555;
+  --color-error-bg: rgba(255, 85, 85, 0.18);
+  --color-correct: #50fa7b;
+  --color-untyped: #6272a4;
+
+  --flow-calm: #50fa7b;
+  --flow-warm: #ffb86c;
+  --flow-hot: #ff79c6;
+  --flow-blazing: #bd93f9;
+}
+
+[data-theme="solarized-dark"] {
+  --color-canvas: #00212b;
+  --color-surface: #002b36;
+  --color-surface-soft: #073642;
+  --color-surface-feature: #0d4654;
+  --color-hairline: #073642;
+  --color-hairline-strong: #586e75;
+  --color-hairline-soft: #002833;
+  --color-ink: #93a1a1;
+  --color-text-muted: #839496;
+  --color-text-dim: #586e75;
+  --color-primary: #2aa198;
+  --color-primary-hover: #35b3aa;
+  --color-primary-pressed: #21857d;
+  --color-on-primary: #002b36;
+  --color-accent: #b58900;
+  --color-accent-purple: #6c71c4;
+  --color-accent-orange: #cb4b16;
+  --color-caret: #268bd2;
+  --color-error: #dc322f;
+  --color-error-bg: rgba(220, 50, 47, 0.18);
+  --color-correct: #859900;
+  --color-untyped: #586e75;
+
+  --flow-calm: #2aa198;
+  --flow-warm: #b58900;
+  --flow-hot: #cb4b16;
+  --flow-blazing: #d33682;
+}
+
+[data-theme="monokai-pro"] {
+  --color-canvas: #221f22;
+  --color-surface: #2d2a2e;
+  --color-surface-soft: #3a373c;
+  --color-surface-feature: #49454b;
+  --color-hairline: #403e41;
+  --color-hairline-strong: #727072;
+  --color-hairline-soft: #323033;
+  --color-ink: #fcfcfa;
+  --color-text-muted: #c1c0c0;
+  --color-text-dim: #727072;
+  --color-primary: #a9dc76;
+  --color-primary-hover: #bded8a;
+  --color-primary-pressed: #8ec45b;
+  --color-on-primary: #2d2a2e;
+  --color-accent: #ffd866;
+  --color-accent-purple: #ab9df2;
+  --color-accent-orange: #fc9867;
+  --color-caret: #ffd866;
+  --color-error: #ff6188;
+  --color-error-bg: rgba(255, 97, 136, 0.18);
+  --color-correct: #a9dc76;
+  --color-untyped: #727072;
+
+  --flow-calm: #a9dc76;
+  --flow-warm: #ffd866;
+  --flow-hot: #fc9867;
+  --flow-blazing: #ab9df2;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* ==========================================================================
+   Typing Engine Text Stream & Glyph Styles
+   ========================================================================== */
+
+.typing-text-arena {
+  font-family: var(--font-mono);
+  font-size: 1.65rem;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  height: 8.5rem;
+  min-height: 8.5rem;
+  max-height: 8.5rem;
+  mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+}
+
+@media (max-width: 640px) {
+  .typing-text-arena {
+    font-size: 1.35rem;
+    height: 7.2rem;
+    min-height: 7.2rem;
+  }
+}
+
+.glyph {
+  position: relative;
+  transition: color 0.06s ease;
+  user-select: none;
+}
+
+.glyph-untyped {
+  color: var(--color-untyped);
+  opacity: 0.85;
+}
+
+.glyph-correct {
+  color: var(--color-ink);
+}
+
+.glyph-incorrect {
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
+  border-radius: 2px;
+  text-decoration: underline;
+  text-decoration-color: var(--color-error);
+  text-decoration-thickness: 2px;
+}
+
+.glyph-extra {
+  color: var(--color-error);
+  opacity: 0.75;
+}
+
+.spring-caret {
+  box-shadow: 0 0 10px var(--color-caret);
+}
+
+.word-complete {
+  opacity: 0.95;
+}
