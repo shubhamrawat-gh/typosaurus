@@ -15,79 +15,35 @@ export interface ThemeDefinition {
 export const THEMES: ThemeDefinition[] = [
   {
     id: 'mongodb-dark',
-    name: 'MongoDB Dark (Default)',
+    name: 'Dark',
     type: 'dark',
     preview: {
-      canvas: '#001e2b',
-      primary: '#00ed64',
-      accent: '#7b3ff2',
-      ink: '#ffffff',
+      canvas: '#111715',
+      primary: '#a4bf9d',
+      accent: '#a4bf9d',
+      ink: '#f2f4ee',
     },
   },
   {
     id: 'mongodb-light',
-    name: 'MongoDB Light',
+    name: 'Light',
     type: 'light',
     preview: {
-      canvas: '#ffffff',
-      primary: '#00684a',
-      accent: '#fa6e39',
-      ink: '#001e2b',
+      canvas: '#f6f5f0',
+      primary: '#42644c',
+      accent: '#42644c',
+      ink: '#1d2921',
     },
   },
   {
-    id: 'matrix-cyber',
-    name: 'Matrix Cyber',
+    id: 'classic-green',
+    name: 'Classic Green',
     type: 'dark',
     preview: {
-      canvas: '#050a06',
-      primary: '#00ff66',
-      accent: '#00ffff',
-      ink: '#c8ffd4',
-    },
-  },
-  {
-    id: 'nord-frost',
-    name: 'Nord Frost',
-    type: 'dark',
-    preview: {
-      canvas: '#242933',
-      primary: '#88c0d0',
-      accent: '#b48ead',
-      ink: '#eceff4',
-    },
-  },
-  {
-    id: 'dracula',
-    name: 'Dracula',
-    type: 'dark',
-    preview: {
-      canvas: '#21222c',
-      primary: '#50fa7b',
-      accent: '#ff79c6',
-      ink: '#f8f8f2',
-    },
-  },
-  {
-    id: 'solarized-dark',
-    name: 'Solarized Dark',
-    type: 'dark',
-    preview: {
-      canvas: '#00212b',
-      primary: '#2aa198',
-      accent: '#b58900',
-      ink: '#93a1a1',
-    },
-  },
-  {
-    id: 'monokai-pro',
-    name: 'Monokai Pro',
-    type: 'dark',
-    preview: {
-      canvas: '#221f22',
-      primary: '#a9dc76',
-      accent: '#ffd866',
-      ink: '#fcfcfa',
+      canvas: '#001e2b',
+      primary: '#00ed64',
+      accent: '#00ed64',
+      ink: '#ffffff',
     },
   },
 ];
@@ -100,12 +56,21 @@ interface ThemeState {
 }
 
 const STORAGE_KEY = 'typosaurus_theme';
+const DEFAULT_THEME_ID = 'mongodb-dark';
+const THEME_IDS = new Set(THEMES.map((theme) => theme.id));
+
+function getSavedTheme(): string {
+  if (typeof window === 'undefined') return DEFAULT_THEME_ID;
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved && THEME_IDS.has(saved) ? saved : DEFAULT_THEME_ID;
+  } catch {
+    return DEFAULT_THEME_ID;
+  }
+}
 
 export const useThemeStore = create<ThemeState>((set, get) => {
-  const initialTheme =
-    typeof window !== 'undefined'
-      ? localStorage.getItem(STORAGE_KEY) || 'mongodb-dark'
-      : 'mongodb-dark';
+  const initialTheme = getSavedTheme();
 
   if (typeof document !== 'undefined') {
     document.documentElement.setAttribute('data-theme', initialTheme);
@@ -114,12 +79,16 @@ export const useThemeStore = create<ThemeState>((set, get) => {
   return {
     currentTheme: initialTheme,
     setTheme: (themeId: string) => {
-      if (!THEMES.some((t) => t.id === themeId)) return;
+      if (!THEME_IDS.has(themeId) || get().currentTheme === themeId) return;
       if (typeof document !== 'undefined') {
         document.documentElement.setAttribute('data-theme', themeId);
       }
       if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, themeId);
+        try {
+          window.localStorage.setItem(STORAGE_KEY, themeId);
+        } catch {
+          // Theme selection still works when storage is unavailable.
+        }
       }
       set({ currentTheme: themeId });
     },

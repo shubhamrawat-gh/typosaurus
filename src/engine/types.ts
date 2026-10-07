@@ -1,4 +1,5 @@
 export type TestMode = 'time' | 'words' | 'zen' | 'code' | 'weak-spots' | 'pressure' | 'daily';
+export type CodeLanguage = 'javascript' | 'typescript' | 'python' | 'html' | 'css' | 'sql';
 
 export type ConfidenceMode = 'off' | 'no-word-backspace' | 'no-backspace';
 export type StopOnError = 'off' | 'letter' | 'word';
@@ -11,6 +12,7 @@ export interface EngineConfig {
   punctuation?: boolean;
   numbers?: boolean;
   seed?: number | string;
+  codeLanguage?: CodeLanguage;
   confidenceMode?: ConfidenceMode;
   stopOnError?: StopOnError;
   blindMode?: boolean;

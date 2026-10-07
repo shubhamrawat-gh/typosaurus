@@ -1,6 +1,7 @@
 import React from 'react';
-import { EngineConfig, TestMode } from '@/engine/types';
-import { useThemeStore, THEMES } from './theme';
+import { CodeLanguage, EngineConfig, TestMode } from '@/engine/types';
+import { CODE_LANGUAGES } from '@/data/code-snippets';
+import { ThemePicker } from './ThemePicker';
 
 interface NavHeaderProps {
   config: EngineConfig;
@@ -8,143 +9,56 @@ interface NavHeaderProps {
 }
 
 export const NavHeader: React.FC<NavHeaderProps> = ({ config, onConfigChange }) => {
-  const { currentTheme, nextTheme } = useThemeStore();
-  const themeObj = THEMES.find((t) => t.id === currentTheme) || THEMES[0];
-
-  const setMode = (mode: TestMode) => {
-    onConfigChange({ ...config, mode });
-  };
-
-  const setDuration = (duration: number) => {
-    onConfigChange({ ...config, mode: 'time', duration });
-  };
-
-  const setWordCount = (wordCount: number) => {
-    onConfigChange({ ...config, mode: 'words', wordCount });
-  };
-
-  const togglePunctuation = () => {
-    onConfigChange({ ...config, punctuation: !config.punctuation });
-  };
-
-  const toggleNumbers = () => {
-    onConfigChange({ ...config, numbers: !config.numbers });
-  };
+  const setMode = (mode: TestMode) => onConfigChange({ ...config, mode });
+  const setCodeLanguage = (codeLanguage: CodeLanguage) => onConfigChange({ ...config, mode: 'code', codeLanguage });
 
   return (
-    <header className="w-full max-w-4xl mx-auto flex items-center justify-between py-6 text-xs font-mono select-none">
-      {/* Brand Wordmark (Linear / Raycast subtle style) */}
-      <div className="flex items-center gap-2">
-        <span className="font-bold tracking-tight text-ink text-sm font-display flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-primary" />
-          typosaurus
-        </span>
+    <header className="app-header">
+      <div className="header-top">
+        <div className="brand" aria-label="Typosaurus home">
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="brand-mark" />
+          <span className="brand-wordmark" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}text-logo.png`} alt="" /></span>
+        </div>
+        <div className="header-actions">
+          <ThemePicker />
+        </div>
       </div>
-
-      {/* Center Segmented Control Pill */}
-      <nav
-        aria-label="Test mode navigation"
-        className="flex items-center gap-1 bg-surface/80 border border-hairline/80 px-2.5 py-1 rounded-full backdrop-blur-md shadow-sm text-text-muted"
-      >
-        {/* Mode Selector */}
-        <div className="flex items-center gap-1 border-r border-hairline pr-2 mr-1">
-          <button
-            onClick={() => setMode('time')}
-            className={`px-2 py-0.5 rounded-full transition-colors ${
-              config.mode === 'time' ? 'text-primary font-semibold bg-surface-soft' : 'hover:text-ink'
-            }`}
-          >
-            time
-          </button>
-          <button
-            onClick={() => setMode('words')}
-            className={`px-2 py-0.5 rounded-full transition-colors ${
-              config.mode === 'words' ? 'text-primary font-semibold bg-surface-soft' : 'hover:text-ink'
-            }`}
-          >
-            words
-          </button>
-          <button
-            onClick={() => setMode('zen')}
-            className={`px-2 py-0.5 rounded-full transition-colors ${
-              config.mode === 'zen' ? 'text-primary font-semibold bg-surface-soft' : 'hover:text-ink'
-            }`}
-          >
-            zen
-          </button>
+      <nav className="test-toolbar" aria-label="Typing test settings">
+        <div className="toolbar-group mode-group" aria-label="Test mode">
+          {(['time', 'words', 'code', 'zen'] as TestMode[]).map((mode) => (
+            <button key={mode} className={`toolbar-button mode-button ${config.mode === mode ? 'is-active' : ''}`} aria-pressed={config.mode === mode} onClick={() => setMode(mode)}>{mode}</button>
+          ))}
         </div>
-
-        {/* Sub-options for Time mode */}
-        {config.mode === 'time' && (
-          <div className="flex items-center gap-1">
-            {[15, 30, 60, 120].map((dur) => (
-              <button
-                key={dur}
-                onClick={() => setDuration(dur)}
-                className={`px-1.5 py-0.5 rounded transition-colors ${
-                  config.duration === dur ? 'text-primary font-bold' : 'hover:text-ink'
-                }`}
-              >
-                {dur}
-              </button>
+        {config.mode !== 'code' && <>
+          <span className="toolbar-divider" aria-hidden="true" />
+          <div className="toolbar-group value-group" aria-label={config.mode === 'time' ? 'Duration in seconds' : 'Word count'}>
+            {config.mode === 'time' && [15, 30, 60, 120].map((duration) => (
+              <button key={duration} className={`toolbar-button value-button ${config.duration === duration ? 'is-active' : ''}`} aria-pressed={config.duration === duration} onClick={() => onConfigChange({ ...config, duration })}>{duration}</button>
             ))}
-          </div>
-        )}
-
-        {/* Sub-options for Words mode */}
-        {config.mode === 'words' && (
-          <div className="flex items-center gap-1">
-            {[10, 25, 50, 100].map((wc) => (
-              <button
-                key={wc}
-                onClick={() => setWordCount(wc)}
-                className={`px-1.5 py-0.5 rounded transition-colors ${
-                  config.wordCount === wc ? 'text-primary font-bold' : 'hover:text-ink'
-                }`}
-              >
-                {wc}
-              </button>
+            {config.mode === 'words' && [10, 25, 50, 100].map((wordCount) => (
+              <button key={wordCount} className={`toolbar-button value-button ${config.wordCount === wordCount ? 'is-active' : ''}`} aria-pressed={config.wordCount === wordCount} onClick={() => onConfigChange({ ...config, wordCount })}>{wordCount}</button>
             ))}
+            {config.mode === 'zen' && <span className="zen-label">Untimed</span>}
           </div>
-        )}
-
-        {/* Punctuation & Numbers Toggles */}
-        <div className="flex items-center gap-1 border-l border-hairline pl-2 ml-1">
-          <button
-            onClick={togglePunctuation}
-            className={`px-1.5 py-0.5 rounded transition-colors ${
-              config.punctuation ? 'text-primary font-bold' : 'hover:text-ink'
-            }`}
-            title="Toggle Punctuation"
-          >
-            @ punctuation
-          </button>
-          <button
-            onClick={toggleNumbers}
-            className={`px-1.5 py-0.5 rounded transition-colors ${
-              config.numbers ? 'text-primary font-bold' : 'hover:text-ink'
-            }`}
-            title="Toggle Numbers"
-          >
-            # numbers
-          </button>
-        </div>
+        </>}
+        {config.mode !== 'code' && <>
+          <span className="toolbar-divider options-divider" aria-hidden="true" />
+          <div className="toolbar-group options-group" aria-label="Text options">
+            <button className={`toolbar-button option-button ${config.punctuation ? 'is-active' : ''}`} aria-pressed={config.punctuation} onClick={() => onConfigChange({ ...config, punctuation: !config.punctuation })}>punctuation</button>
+            <button className={`toolbar-button option-button ${config.numbers ? 'is-active' : ''}`} aria-pressed={config.numbers} onClick={() => onConfigChange({ ...config, numbers: !config.numbers })}>numbers</button>
+          </div>
+        </>}
       </nav>
-
-      {/* Right Controls: Theme cycle pill */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={nextTheme}
-          className="flex items-center gap-1.5 hover:text-ink text-text-muted transition-colors py-1 px-2.5 rounded-full hover:bg-surface border border-transparent hover:border-hairline"
-          title="Click to cycle themes"
-        >
-          <span
-            className="w-2 h-2 rounded-full border border-hairline"
-            style={{ backgroundColor: themeObj.preview.primary }}
-          />
-          <span className="hidden sm:inline capitalize">{themeObj.name.split(' ')[0]}</span>
-        </button>
-      </div>
+      {config.mode === 'code' && <nav className="language-bar" aria-label="Code language">
+        {CODE_LANGUAGES.map((language) => (
+          <button
+            key={language.id}
+            className={`language-button ${(config.codeLanguage ?? 'javascript') === language.id ? 'is-active' : ''}`}
+            aria-pressed={(config.codeLanguage ?? 'javascript') === language.id}
+            onClick={() => setCodeLanguage(language.id)}
+          >{language.label}</button>
+        ))}
+      </nav>}
     </header>
   );
 };

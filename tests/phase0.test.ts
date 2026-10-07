@@ -54,13 +54,10 @@ describe('Phase 0 - Setup & Infrastructure Verification', () => {
       expect(current).toBe('mongodb-dark');
     });
 
-    it('supports 7 distinct themes maintaining the design token structure', () => {
-      expect(THEMES.length).toBeGreaterThanOrEqual(6);
+    it('offers dark, light, and classic green themes', () => {
+      expect(THEMES.length).toBe(3);
       const ids = THEMES.map((t) => t.id);
-      expect(ids).toContain('mongodb-dark');
-      expect(ids).toContain('mongodb-light');
-      expect(ids).toContain('matrix-cyber');
-      expect(ids).toContain('dracula');
+      expect(ids).toEqual(['mongodb-dark', 'mongodb-light', 'classic-green']);
     });
 
     it('cycles through next and previous themes seamlessly', () => {
@@ -70,6 +67,16 @@ describe('Phase 0 - Setup & Infrastructure Verification', () => {
 
       useThemeStore.getState().prevTheme();
       expect(useThemeStore.getState().currentTheme).toBe('mongodb-dark');
+    });
+
+    it('selects a theme directly and skips repeated writes', () => {
+      let updates = 0;
+      const unsubscribe = useThemeStore.subscribe(() => { updates++; });
+      useThemeStore.getState().setTheme('classic-green');
+      useThemeStore.getState().setTheme('classic-green');
+      expect(useThemeStore.getState().currentTheme).toBe('classic-green');
+      expect(updates).toBe(1);
+      unsubscribe();
     });
   });
 

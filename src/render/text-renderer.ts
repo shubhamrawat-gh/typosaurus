@@ -73,6 +73,7 @@ export class TextRenderer {
       const wordDiv = document.createElement('div');
       wordDiv.className = 'word';
       wordDiv.setAttribute('data-word-idx', String(w));
+      wordDiv.setAttribute('data-line', String(w + 1));
       wordDiv.style.display = 'inline-flex';
       wordDiv.style.position = 'relative';
 

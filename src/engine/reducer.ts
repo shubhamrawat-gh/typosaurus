@@ -1,5 +1,6 @@
 import { EngineState, EngineConfig, CharStatus } from './types';
 import { generateWords } from './text-generator';
+import { generateCodeLines } from '@/data/code-snippets';
 
 export type EngineAction =
   | { type: 'START'; timestamp: number }
@@ -11,7 +12,7 @@ export type EngineAction =
 
 export function createInitialState(config: EngineConfig): EngineState {
   const wordCount = config.mode === 'words' ? (config.wordCount ?? 25) : 80;
-  const words = generateWords({
+  const words = config.mode === 'code' ? generateCodeLines(config.seed, config.codeLanguage) : generateWords({
     count: wordCount,
     punctuation: config.punctuation,
     numbers: config.numbers,
@@ -182,8 +183,22 @@ export function engineReducer(state: EngineState, action: EngineAction): EngineS
         return s;
       }
 
-      // 2. Space key: advances word
-      if (key === ' ') {
+      // Code mode preserves spaces inside each line. Enter advances to the next line.
+      if (s.config.mode === 'code' && key === 'Enter') {
+        if (currentTyped.length === 0) return s;
+        const nextLine = currentWordIndex + 1;
+        const finished = nextLine >= words.length;
+        return {
+          ...s,
+          currentWordIndex: nextLine,
+          currentCharIndex: 0,
+          status: finished ? 'finished' : s.status,
+          endTime: finished ? action.timestamp : s.endTime,
+        };
+      }
+
+      // 2. Space key: advances word in prose modes
+      if (key === ' ' && s.config.mode !== 'code') {
         if (currentTyped.length === 0) return s; // Ignore leading spaces
 
         // Stop on error: word policy
@@ -277,7 +292,7 @@ export function engineReducer(state: EngineState, action: EngineAction): EngineS
 
         const isLastWord = currentWordIndex === words.length - 1;
         const isLastChar = currentCharIndex + 1 === targetWord.length;
-        const shouldFinish = s.config.mode === 'words' && isLastWord && isLastChar && isCorrect;
+        const shouldFinish = (s.config.mode === 'words' || s.config.mode === 'code') && isLastWord && isLastChar && isCorrect;
 
         return {
           ...s,

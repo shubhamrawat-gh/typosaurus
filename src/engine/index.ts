@@ -105,7 +105,7 @@ export class TypingEngine {
       return false;
     }
 
-    // Ignore browser shortcuts like Ctrl+Shift+P, Ctrl+R, etc.
+    // Ignore browser shortcuts such as Ctrl+R.
     if (ctrlKey && key !== 'Backspace' && key !== 'a' && key !== 'v') {
       return false;
     }
@@ -131,7 +131,7 @@ export class TypingEngine {
     this.state = newState;
 
     // Record telemetry
-    if (this.state.status === 'running' || prevStatus === 'idle') {
+    if (this.state.status === 'running' || prevStatus === 'running' || prevStatus === 'idle') {
       const targetWord = this.state.words[prevWordIdx] || '';
       const expected = prevCharIdx < targetWord.length ? targetWord[prevCharIdx] : ' ';
       const status =
@@ -143,7 +143,11 @@ export class TypingEngine {
 
     // Check if finished via word count
     if (this.state.status === 'finished') {
-      this.finish();
+      const metrics = this.getMetrics();
+      this.notify();
+      for (const listener of this.finishListeners) {
+        listener(this.state, metrics, this.telemetry);
+      }
       return true;
     }
 
