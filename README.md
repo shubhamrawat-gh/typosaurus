@@ -12,6 +12,7 @@
 
 <p align="center">
   <a href="https://shubhamrawat-gh.github.io/typosaurus/">Live Application</a> &bull;
+  <a href="#preview">Preview</a> &bull;
   <a href="#branding--assets">Assets</a> &bull;
   <a href="#architectural-foundations">Architecture</a> &bull;
   <a href="#engine-specifications">Engine Specs</a> &bull;
@@ -29,8 +30,8 @@
   <img src="https://img.shields.io/badge/Network_Calls-0_(Local_Only)-000000?style=flat-square" alt="Offline Ready" />
 </p>
 
-<p align="center">
-  <img src="assets/preview.png" alt="Typosaurus Live Arena" width="800" style="border-radius: 8px; max-width: 100%;" />
+<p align="center" id="preview">
+  <img src="assets/live-ss.png" alt="Typosaurus Live Arena Screenshot" width="850" style="border-radius: 8px; max-width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
 </p>
 
 ---
@@ -142,7 +143,7 @@ All project branding, visual marks, and high-resolution media assets are organiz
 | **Favicon Master** | <img src="assets/favicon.png" alt="Favicon" width="36" /> | Master Application Icon (PNG) | [`assets/favicon.png`](./assets/favicon.png) |
 | **Favicon 32x32** | <img src="assets/favicon-32x32.png" alt="Favicon 32" width="32" /> | Standard Web Browser Tab Icon (PNG) | [`assets/favicon-32x32.png`](./assets/favicon-32x32.png) |
 | **Apple Touch Icon** | <img src="assets/apple-touch-icon.png" alt="Apple Touch Icon" width="48" /> | iOS / Mobile Home Screen Icon (PNG) | [`assets/apple-touch-icon.png`](./assets/apple-touch-icon.png) |
-| **Arena Preview** | <img src="assets/preview.png" alt="Interface Preview" width="160" /> | Full Application Arena Capture | [`assets/preview.png`](./assets/preview.png) |
+| **Live Arena Screenshot** | <img src="assets/live-ss.png" alt="Live Screenshot" width="160" /> | High-Fidelity Application Capture (PNG) | [`assets/live-ss.png`](./assets/live-ss.png) |
 
 > **Note on Static Bundling**: Runtime web assets required for Vite bundler packaging and GitHub Pages hosting are served from [`public/`](./public) for direct static asset resolution.
 
@@ -159,8 +160,8 @@ All project branding, visual marks, and high-resolution media assets are organiz
 │   ├── apple-touch-icon.png    # Mobile home screen icon
 │   ├── favicon-32x32.png       # 32x32 browser tab icon
 │   ├── favicon.png             # Master brand icon
+│   ├── live-ss.png             # Application arena preview screenshot
 │   ├── logo.png                # Primary high-resolution emblem
-│   ├── preview.png             # Application arena preview screenshot
 │   └── text-logo.png           # Typographic wordmark
 ├── public/                     # Static production assets served by Vite
 │   ├── apple-touch-icon.png
