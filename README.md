@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="public/logo.png" alt="Typosaurus Logo" width="128" height="128" />
+  <img src="assets/logo.png" alt="Typosaurus Logo" width="120" height="120" />
+  <br />
+  <img src="assets/text-logo.png" alt="Typosaurus Wordmark" width="220" />
 </p>
 
 <h1 align="center">Typosaurus</h1>
@@ -10,6 +12,7 @@
 
 <p align="center">
   <a href="https://shubhamrawat-gh.github.io/typosaurus/">Live Application</a> &bull;
+  <a href="#branding--assets">Assets</a> &bull;
   <a href="#architectural-foundations">Architecture</a> &bull;
   <a href="#engine-specifications">Engine Specs</a> &bull;
   <a href="#modes-and-evaluation">Modes</a> &bull;
@@ -24,6 +27,10 @@
   <img src="https://img.shields.io/badge/Audio-Web_Audio_API-F59E0B?style=flat-square" alt="Web Audio API" />
   <img src="https://img.shields.io/badge/Persistence-IndexedDB_(Dexie)-6366F1?style=flat-square" alt="IndexedDB" />
   <img src="https://img.shields.io/badge/Network_Calls-0_(Local_Only)-000000?style=flat-square" alt="Offline Ready" />
+</p>
+
+<p align="center">
+  <img src="assets/preview.png" alt="Typosaurus Live Arena" width="800" style="border-radius: 8px; max-width: 100%;" />
 </p>
 
 ---
@@ -124,6 +131,23 @@ The user interface adheres to a minimalist layout driven by design tokens and st
 
 ---
 
+## Branding & Assets
+
+All project branding, visual marks, and high-resolution media assets are organized within the [`assets/`](./assets) section for repository documentation, presentation, and external use:
+
+| Asset | Preview | Specifications | Repository Path |
+| :--- | :---: | :--- | :--- |
+| **Primary Logo** | <img src="assets/logo.png" alt="Primary Logo" width="56" /> | High-Resolution Mascot Emblem (PNG) | [`assets/logo.png`](./assets/logo.png) |
+| **Wordmark** | <img src="assets/text-logo.png" alt="Wordmark" width="130" /> | Brand Typographic Wordmark (PNG) | [`assets/text-logo.png`](./assets/text-logo.png) |
+| **Favicon Master** | <img src="assets/favicon.png" alt="Favicon" width="36" /> | Master Application Icon (PNG) | [`assets/favicon.png`](./assets/favicon.png) |
+| **Favicon 32x32** | <img src="assets/favicon-32x32.png" alt="Favicon 32" width="32" /> | Standard Web Browser Tab Icon (PNG) | [`assets/favicon-32x32.png`](./assets/favicon-32x32.png) |
+| **Apple Touch Icon** | <img src="assets/apple-touch-icon.png" alt="Apple Touch Icon" width="48" /> | iOS / Mobile Home Screen Icon (PNG) | [`assets/apple-touch-icon.png`](./assets/apple-touch-icon.png) |
+| **Arena Preview** | <img src="assets/preview.png" alt="Interface Preview" width="160" /> | Full Application Arena Capture | [`assets/preview.png`](./assets/preview.png) |
+
+> **Note on Static Bundling**: Runtime web assets required for Vite bundler packaging and GitHub Pages hosting are served from [`public/`](./public) for direct static asset resolution.
+
+---
+
 ## Repository Structure
 
 ```
@@ -131,10 +155,19 @@ The user interface adheres to a minimalist layout driven by design tokens and st
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml          # Automated GitHub Pages CI/CD pipeline
-├── public/
-│   ├── favicon.png             # Application brand marks and icons
+├── assets/                     # Official brand marks, icons, and repository media
+│   ├── apple-touch-icon.png    # Mobile home screen icon
+│   ├── favicon-32x32.png       # 32x32 browser tab icon
+│   ├── favicon.png             # Master brand icon
 │   ├── logo.png                # Primary high-resolution emblem
+│   ├── preview.png             # Application arena preview screenshot
 │   └── text-logo.png           # Typographic wordmark
+├── public/                     # Static production assets served by Vite
+│   ├── apple-touch-icon.png
+│   ├── favicon-32x32.png
+│   ├── favicon.png
+│   ├── logo.png
+│   └── text-logo.png
 ├── src/
 │   ├── audio/                  # Procedural Web Audio API sound synthesizers
 │   ├── components/             # React shell components and overlays
