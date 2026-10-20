@@ -16,9 +16,14 @@ export class TextRenderer {
   // Cached DOM references
   private wordElements: HTMLElement[] = [];
   private charElements: HTMLElement[][] = [];
+  private extraElements: HTMLElement[][] = [];
   private currentWordIndex: number = 0;
   private currentCharIndex: number = 0;
   private lastRenderedStatuses: CharStatus[][] = [];
+
+  // Style memoization to prevent layout/style recalculation thrashing
+  private lastCaretHeight: number = -1;
+  private lastScrollY: number = 0;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -35,9 +40,11 @@ export class TextRenderer {
     this.wordsContainer.style.flexWrap = 'wrap';
     this.wordsContainer.style.gap = '0.45em 0.7em';
     this.wordsContainer.style.userSelect = 'none';
+    this.wordsContainer.style.willChange = 'transform';
+    this.wordsContainer.style.backfaceVisibility = 'hidden';
     this.container.appendChild(this.wordsContainer);
 
-    // Spring Caret element
+    // Spring Caret element with dedicated hardware acceleration layer
     this.caretElement = document.createElement('div');
     this.caretElement.className = 'spring-caret will-change-transform';
     this.caretElement.style.position = 'absolute';
@@ -50,6 +57,9 @@ export class TextRenderer {
     this.caretElement.style.pointerEvents = 'none';
     this.caretElement.style.zIndex = '10';
     this.caretElement.style.transition = 'opacity 0.2s ease';
+    this.caretElement.style.willChange = 'transform';
+    this.caretElement.style.backfaceVisibility = 'hidden';
+    this.caretElement.style.perspective = '1000px';
     this.wordsContainer.appendChild(this.caretElement);
 
     this.setupResizeObserver();
@@ -64,11 +74,13 @@ export class TextRenderer {
     this.wordsContainer.innerHTML = '';
     this.wordsContainer.appendChild(this.caretElement);
 
-    this.wordElements = new Array(words.length);
-    this.charElements = new Array(words.length);
-    this.lastRenderedStatuses = words.map((w) => new Array(w.length).fill('untyped'));
+    const len = words.length;
+    this.wordElements = new Array(len);
+    this.charElements = new Array(len);
+    this.extraElements = new Array(len);
+    this.lastRenderedStatuses = new Array(len);
 
-    for (let w = 0; w < words.length; w++) {
+    for (let w = 0; w < len; w++) {
       const word = words[w];
       const wordDiv = document.createElement('div');
       wordDiv.className = 'word';
@@ -78,7 +90,6 @@ export class TextRenderer {
       wordDiv.style.position = 'relative';
 
       const chars: HTMLElement[] = new Array(word.length);
-
       for (let c = 0; c < word.length; c++) {
         const charSpan = document.createElement('span');
         charSpan.className = 'glyph glyph-untyped';
@@ -90,6 +101,8 @@ export class TextRenderer {
       this.wordsContainer.appendChild(wordDiv);
       this.wordElements[w] = wordDiv;
       this.charElements[w] = chars;
+      this.extraElements[w] = [];
+      this.lastRenderedStatuses[w] = new Array(word.length).fill('untyped');
     }
 
     // Remeasure layout
@@ -101,6 +114,7 @@ export class TextRenderer {
     const initialPos = this.rectCache.getCaretPosition(0, 0);
     if (initialPos) {
       this.caretSpring.snapTo(initialPos.x, initialPos.y);
+      this.lastCaretHeight = initialPos.height;
       this.caretElement.style.height = `${initialPos.height}px`;
     }
   }
@@ -113,7 +127,7 @@ export class TextRenderer {
 
   /**
    * Synchronous, sub-millisecond hot-path update.
-   * Only updates dirty glyph classNames and sets caret spring target.
+   * Zero DOM queries, only updates dirty glyph classNames and sets caret spring target.
    */
   public update(state: EngineState): void {
     const { currentWordIndex, currentCharIndex, charStatuses, typedWords } = state;
@@ -141,24 +155,26 @@ export class TextRenderer {
         }
       }
 
-      // Handle extra characters typed
+      // Handle extra characters typed (zero DOM queries: uses cached extraElements)
       const extraCharsCount = wordStatuses.length - targetLen;
-      const currentExtras = wordDiv.querySelectorAll('.glyph-extra');
+      const extras = this.extraElements[currentWordIndex] || (this.extraElements[currentWordIndex] = []);
 
-      if (extraCharsCount > currentExtras.length) {
+      if (extraCharsCount > extras.length) {
         // Add new extra character
         const typedStr = typedWords[currentWordIndex] || '';
-        for (let i = currentExtras.length; i < extraCharsCount; i++) {
+        for (let i = extras.length; i < extraCharsCount; i++) {
           const char = typedStr[targetLen + i] || '';
           const extraSpan = document.createElement('span');
           extraSpan.className = 'glyph glyph-extra';
           extraSpan.textContent = char;
           wordDiv.appendChild(extraSpan);
+          extras.push(extraSpan);
         }
-      } else if (extraCharsCount < currentExtras.length) {
+      } else if (extraCharsCount < extras.length) {
         // Remove trailing extra characters on backspace
-        for (let i = currentExtras.length - 1; i >= extraCharsCount; i--) {
-          currentExtras[i].remove();
+        for (let i = extras.length - 1; i >= extraCharsCount; i--) {
+          const el = extras.pop();
+          el?.remove();
         }
       }
     }
@@ -180,7 +196,12 @@ export class TextRenderer {
     if (!pos) return;
 
     this.caretSpring.setTarget(pos.x, pos.y);
-    this.caretElement.style.height = `${pos.height}px`;
+
+    // Avoid redundant style recalculations: only update caret height if changed
+    if (Math.abs(pos.height - this.lastCaretHeight) > 0.5) {
+      this.lastCaretHeight = pos.height;
+      this.caretElement.style.height = `${pos.height}px`;
+    }
 
     // 3. Line scroll handling
     // If caret moves beyond line 2 (e.g. y > 60px), smoothly scroll the container up
@@ -197,16 +218,19 @@ export class TextRenderer {
     this.schedulerUnsub = scheduler.subscribe(
       'text-renderer',
       (dtSeconds) => {
-        // Step caret spring physics
+        // Step caret spring physics (closed-form analytical evaluation)
         const caretActive = this.caretSpring.update(dtSeconds);
         if (caretActive || this.caretSpring.vx !== 0 || this.caretSpring.vy !== 0) {
-          this.caretElement.style.transform = `translate3d(${this.caretSpring.x}px, ${this.caretSpring.y}px, 0)`;
+          this.caretElement.style.transform = `translate3d(${this.caretSpring.x.toFixed(2)}px, ${this.caretSpring.y.toFixed(2)}px, 0)`;
         }
 
         // Step scroll spring physics
         const scrollActive = this.scrollSpring.update(dtSeconds);
         if (scrollActive || this.scrollSpring.vy !== 0) {
-          this.wordsContainer.style.transform = `translate3d(0, ${this.scrollSpring.y}px, 0)`;
+          if (Math.abs(this.scrollSpring.y - this.lastScrollY) > 0.05) {
+            this.lastScrollY = this.scrollSpring.y;
+            this.wordsContainer.style.transform = `translate3d(0, ${this.scrollSpring.y.toFixed(2)}px, 0)`;
+          }
         }
       },
       5 // High priority rendering

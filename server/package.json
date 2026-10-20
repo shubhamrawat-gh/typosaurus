@@ -1,0 +1,15 @@
+{
+  "name": "typosaurus-server",
+  "version": "1.0.0",
+  "description": "Typosaurus Enterprise Backend - Realtime Race Engine, Biometric Anti-Cheat, and Ranking Platform",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts",
+    "dev": "node --watch --experimental-strip-types src/index.ts",
+    "test": "vitest run"
+  },
+  "keywords": ["typosaurus", "typing-engine", "realtime-race", "anticheat", "biometrics"],
+  "author": "Typosaurus Team",
+  "license": "MIT"
+}

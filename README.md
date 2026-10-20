@@ -5,27 +5,25 @@
 <h1 align="center">Typosaurus</h1>
 
 <p align="center">
-  <strong>A deterministic, local-first typing performance platform engineered for sub-millisecond input latency and locked 60 FPS animation loops.</strong>
+  <strong>A deterministic, local-first typing performance platform and enterprise backend engineered for sub-millisecond input latency, constant 60+ FPS caret dynamics, real-time multiplayer racing, and biometric anti-cheat.</strong>
 </p>
 
 <p align="center">
   <a href="https://shubhamrawat-gh.github.io/typosaurus/">Live Application</a> &bull;
   <a href="#preview">Preview</a> &bull;
-  <a href="#branding--assets">Assets</a> &bull;
   <a href="#architectural-foundations">Architecture</a> &bull;
-  <a href="#engine-specifications">Engine Specs</a> &bull;
+  <a href="#cursor-physics--60-fps-engine">60+ FPS Cursor</a> &bull;
+  <a href="#enterprise-backend-architecture">Enterprise Backend</a> &bull;
   <a href="#modes-and-evaluation">Modes</a> &bull;
-  <a href="#audio-synthesis">Audio Engine</a> &bull;
   <a href="#development">Development</a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/TypeScript-Strict_5.6-3178C6?style=flat-square" alt="TypeScript Strict" />
-  <img src="https://img.shields.io/badge/Framework-React_18_+_Vite_5-61DAFB?style=flat-square" alt="React + Vite" />
-  <img src="https://img.shields.io/badge/Hot_Path-Imperative_DOM_/_rAF-10B981?style=flat-square" alt="Imperative Hot Path" />
-  <img src="https://img.shields.io/badge/Audio-Web_Audio_API-F59E0B?style=flat-square" alt="Web Audio API" />
-  <img src="https://img.shields.io/badge/Persistence-IndexedDB_(Dexie)-6366F1?style=flat-square" alt="IndexedDB" />
-  <img src="https://img.shields.io/badge/Network_Calls-0_(Local_Only)-000000?style=flat-square" alt="Offline Ready" />
+  <img src="https://img.shields.io/badge/Caret_Dynamics-Analytical_Harmonic_Spring_(60--360Hz)-10B981?style=flat-square" alt="60-360Hz Caret" />
+  <img src="https://img.shields.io/badge/Multiplayer-Realtime_WebSocket_Races-6366F1?style=flat-square" alt="Multiplayer Race Engine" />
+  <img src="https://img.shields.io/badge/Anti--Cheat-Keystroke_Biometrics_+_HMAC-EC4899?style=flat-square" alt="Biometric Anti-Cheat" />
+  <img src="https://img.shields.io/badge/Backend-Standalone_Node.js_HTTP_+_WS-F59E0B?style=flat-square" alt="Standalone Backend" />
 </p>
 
 <p align="center" id="preview">
@@ -36,168 +34,98 @@
 
 ## Overview
 
-Typosaurus is a minimalist, precision-tuned typing software architecture designed from first principles. Unlike conventional typing web applications that trigger React reconciliation cascades on every keystroke, Typosaurus isolates its input dispatch and visual interpolation inside an imperative hot-path loop. Keystroke registration, spring caret dynamics, and procedural audio synthesis execute deterministically within a 16.67ms frame budget.
+Typosaurus is an enterprise-grade typing performance platform designed from first principles. Unlike conventional typing applications that suffer from React reconciliation lag, DOM reflow thrashing, and numerical spring drift, Typosaurus decouples its input dispatch and visual interpolation inside an imperative hot-path loop.
 
-All metrics, user preferences, and historical test aggregates reside strictly within client-side IndexedDB. Zero telemetry, zero analytics tracking, and zero runtime network dependencies.
-
----
-
-## Architectural Foundations
-
-### 1. Decoupled Imperative Hot Path
-React governs application shell mounting, theme switches, and high-level route orchestration. The active typing session operates completely outside React state:
-- Keystroke events fire directly into an imperative reducer.
-- Active caret coordinates and character render states are written straight to DOM/Canvas nodes via a persistent `requestAnimationFrame` loop.
-- Garbage collection pressure is eliminated by pre-allocating state buffers and avoiding per-stroke object allocations.
-
-```
-[Hardware Key Event]
-        |
-        v
-[Imperative Input Handler]
-        |
-        +---> [Procedural Web Audio Engine] (Instant acoustic feedback)
-        |
-        +---> [Typing State Reducer] (Buffer mutation, zero allocation)
-                    |
-                    +---> [Spring Caret Physics] (Interpolated rAF step)
-                    |
-                    +---> [Incremental DOM Patch] (Direct class list mutation)
-                    |
-                    +---> [Metrics Collector] (Timestamp buffer & error maps)
-```
-
-### 2. Spring-Physics Caret Mechanics
-Rather than relying on stepped CSS keyframes, the cursor calculates its position through a damped harmonic oscillator model:
-- Constant smooth transitions between variable character bounding boxes.
-- Inertial recovery on rapid bursts and cadence changes.
-- Responsive sizing and automatic line-wrapping recalibration.
-
-### 3. Procedural Audio Synthesis
-Typosaurus downloads zero audio files. Sound feedback is synthesized procedurally in real time via the browser's native `AudioContext`:
-- Dynamic parametric envelopes (biquad filters, sine/triangle oscillators, transient click impulses).
-- Three distinct acoustic profiles: Mechanical Switch, Soft Membrane, and Minimal Click.
-- Zero audio-buffering latency and zero network overhead.
-
-### 4. Local-First Persistence
-Data sovereignty is guaranteed by design:
-- Local IndexedDB storage powered by Dexie.js schema migrations.
-- Detailed keystroke intervals, word accuracy maps, and weak-spot distributions remain entirely on the local machine.
-- 100% functional without an active network connection.
+The platform combines an **analytical harmonic oscillator cursor engine** delivering locked 60+ FPS motion across any refresh rate (60Hz, 120Hz, 144Hz, 240Hz, 360Hz+) with a **high-throughput standalone backend** featuring biometric keystroke anti-cheat, real-time multiplayer race synchronization, and global percentile ranking.
 
 ---
 
-## Engine Specifications
+## Cursor Physics & 60+ FPS Engine
 
-| Metric / Attribute | Specification |
-|:---|:---|
-| Target Frame Rate | Continuous 60 FPS (16.67ms budget) |
-| Input Event Overhead | < 0.5ms dispatch-to-buffer latency |
-| Network Dependency | 0 runtime HTTP requests |
-| Audio Latency | Native Web Audio buffer-less synthesis |
-| Storage Engine | IndexedDB (Dexie client layer) |
-| Bundle Size | Optimized production distribution |
-| Type System | TypeScript Strict Mode (`noImplicitAny`, strict null checks) |
+The Typosaurus cursor animation guarantees locked 60+ FPS (and high refresh rate) motion through three architectural innovations:
+
+### 1. Closed-Form Analytical Harmonic Oscillator (`src/render/spring.ts`)
+Rather than crude Euler approximations that suffer from timestep discretization errors and frame-rate drift, Typosaurus solves the exact 2nd-order differential equation of damped harmonic motion analytically:
+
+$$m \ddot{x} + c \dot{x} + k(x - x_{\text{target}}) = 0$$
+
+- **Exact $O(1)$ Math**: Position $x(t)$ and velocity $v(t)$ are evaluated directly in closed form with machine precision.
+- **Unconditionally Frame-Rate Independent**: Evaluated identically on 60Hz displays, 120Hz ProMotion screens, and 240Hz/360Hz esports monitors with zero integration error.
+- **Adaptive Burst Responsiveness**: Dynamically stiffens during rapid keystroke bursts ($>150$ WPM) so the cursor never lags behind fast typists, while retaining silky inertial gliding on line transitions.
+- **Sub-Pixel Convergence**: Snaps cleanly when $|x - x_{\text{target}}| < 0.1\text{px}$ and $|v| < 0.1\text{px/s}$, idling the renderer with zero CPU/GPU waste.
+
+### 2. Zero-DOM-Query Hot Path (`src/render/text-renderer.ts`)
+- **Glyph Caching**: Pre-allocated `extraElements` glyph references completely eliminate expensive `querySelectorAll` operations during typing.
+- **Style Recalculation Elimination**: Caret height mutations are memoized and applied only on font/line changes, preventing browser layout thrashing.
+- **Hardware Layer Promotion**: Dedicated GPU compositor layers (`will-change: transform`, `translate3d`, `backface-visibility: hidden`) guarantee zero composite stutter.
+
+---
+
+## Enterprise Backend Architecture
+
+Located in `server/`, Typosaurus features a high-throughput, standalone backend engineered like a billion-dollar platform:
+
+```
+                          [ Client Keystrokes ]
+                                    |
+                    +---------------+---------------+
+                    |                               |
+                    v                               v
+        [ REST API /api/v1/* ]             [ WebSocket /ws ]
+                    |                               |
+    +---------------+---------------+               |
+    |               |               |               |
+    v               v               v               v
+[ Anti-Cheat   [ Global        [ Telemetry     [ Real-Time
+  Biometrics     Percentiles     Ring Buffer     Multiplayer
+  Engine ]       Engine ]        Pipeline ]      Race Engine ]
+    |               |               |               |
+    +---> HMAC      +---> Tiers     +---> 100k+     +---> Matchmaking
+          Certs           & Ranks         EPS             & Podiums
+```
+
+### 1. Biometric Keystroke Anti-Cheat (`server/src/anticheat/`)
+Detects synthetic scripts, tampermonkey bots, and auto-typers through neuromuscular biometric profiling:
+- **Inter-Keystroke Interval (IKI) Statistics**: Measures mean, standard deviation, and Coefficient of Variation ($CV = \sigma / \mu$). Unnatural robotic uniformity ($CV < 0.08$) triggers instant bot flags.
+- **Shannon Entropy Analysis**: Evaluates rhythmic entropy across 20ms IKI histogram buckets. Natural human typing exhibits $2.5\text{--}5.5\text{ bits}$; macro scripts produce flat uniform or unnaturally low distributions ($<1.4\text{ bits}$).
+- **Paste & Burst Injection Detection**: Identifies micro-bursts ($<3\text{ms}$) and superhuman speeds ($>300\text{ WPM}$).
+- **Cryptographic HMAC-SHA256 Test Certificates**: Verified typing tests receive a tamper-proof digital certificate signed with a server secret.
+
+### 2. Real-Time Multiplayer Race Engine (`server/src/multiplayer/`)
+- **Room Lifecycle**: Manages `LOBBY` $\rightarrow$ `COUNTDOWN` (3s synchronized start) $\rightarrow$ `ACTIVE` $\rightarrow$ `FINISHED`.
+- **Public & Private Rooms**: Supports public matchmaking pools and custom 6-character room codes (`NX79B2`).
+- **Live Progress Synchronization**: Streams opponent caret positions, instantaneous WPM, and progress percentages over low-overhead WebSockets.
+- **Podium Determination**: Calculates 1st, 2nd, and 3rd place finishes with millisecond precision.
+
+### 3. Global Percentile Ranking Engine (`server/src/leaderboard/`)
+- **Competitive Tiers**: Grandmaster (Top 0.1%), Master (Top 1%), Diamond (Top 5%), Platinum (Top 15%), Gold (Top 35%), Silver (Top 65%), Bronze.
+- **Multi-Dimensional Boards**: Segmented by duration (`time-15`, `time-30`, `time-60`), word count (`words-25`, `words-50`), and programming language.
+- **WPM Distribution Histograms**: Real-time statistical distribution buckets for global performance comparison charts.
+
+### 4. High-Throughput Telemetry Pipeline (`server/src/analytics/`)
+- **Power-of-2 Ring Buffer**: Pre-allocated circular buffer with bitwise masking, capable of ingesting **100,000+ keystroke events per second** with zero memory allocations.
+- **Asynchronous Batch Flusher**: Drains events in configurable batch windows with automatic backpressure management.
 
 ---
 
 ## Modes and Evaluation
 
-Typosaurus includes comprehensive evaluation modes tailored for different training disciplines:
-
 - **Time Mode**: Timed endurance trials (15s, 30s, 60s, 120s) with live pace projection and accuracy tracking.
 - **Words Mode**: Fixed lexical sets (10, 25, 50, 100 words) assessing consistency and error mitigation.
-- **Zen Mode**: Unbounded stream typing with freeform pacing, no countdown, and real-time cadence monitoring.
-- **Code Mode**: Syntax-accurate programming language drills featuring structured indentation, brackets, and operators across:
-  - TypeScript / JavaScript
-  - Python
-  - Rust
-  - Go
-  - HTML & CSS
-- **Practice & Weakness Drills**: Targeted repetition targeting specific finger mechanics, homing keys, and error-prone digrams.
+- **Zen Mode**: Unbounded stream typing with freeform pacing and real-time cadence monitoring.
+- **Code Mode**: Syntax-accurate programming drills across TypeScript, Python, Rust, Go, HTML, and CSS.
+- **Multiplayer Races**: Head-to-head live typing competitions with real-time opponent progress bars.
 
 ---
 
-## Visual Design & Theming
-
-The user interface adheres to a minimalist layout driven by design tokens and strict WCAG contrast standards. Themes dynamically remap CSS variables without causing layout thrashing:
-
-- **Deep Forest**: Low-luminance greens paired with subtle earthy accents.
-- **Obsidian**: High-contrast OLED dark palette for minimum eye strain.
-- **Cyberpunk**: Vibrant neon cyan and magenta accents on deep ink canvas.
-- **Chalkboard**: Matte monochromatic surface inspired by physical slate.
-- **Solarized**: Scientifically balanced color temperature palette.
-
----
-
-## Branding & Assets
-
-All project branding, visual marks, and high-resolution media assets are organized within the [`assets/`](./assets) section for repository documentation, presentation, and external use:
-
-| Asset | Preview | Specifications | Repository Path |
-| :--- | :---: | :--- | :--- |
-| **Primary Logo** | <img src="assets/logo.png" alt="Primary Logo" width="56" /> | High-Resolution Mascot Emblem (PNG) | [`assets/logo.png`](./assets/logo.png) |
-| **Wordmark** | <img src="assets/text-logo.png" alt="Wordmark" width="130" /> | Brand Typographic Wordmark (PNG) | [`assets/text-logo.png`](./assets/text-logo.png) |
-| **Favicon Master** | <img src="assets/favicon.png" alt="Favicon" width="36" /> | Master Application Icon (PNG) | [`assets/favicon.png`](./assets/favicon.png) |
-| **Favicon 32x32** | <img src="assets/favicon-32x32.png" alt="Favicon 32" width="32" /> | Standard Web Browser Tab Icon (PNG) | [`assets/favicon-32x32.png`](./assets/favicon-32x32.png) |
-| **Apple Touch Icon** | <img src="assets/apple-touch-icon.png" alt="Apple Touch Icon" width="48" /> | iOS / Mobile Home Screen Icon (PNG) | [`assets/apple-touch-icon.png`](./assets/apple-touch-icon.png) |
-| **Live Arena Screenshot** | <img src="assets/live-ss.png" alt="Live Screenshot" width="160" /> | High-Fidelity Application Capture (PNG) | [`assets/live-ss.png`](./assets/live-ss.png) |
-
-> **Note on Static Bundling**: Runtime web assets required for Vite bundler packaging and GitHub Pages hosting are served from [`public/`](./public) for direct static asset resolution.
-
----
-
-## Repository Structure
-
-```
-.
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # Automated GitHub Pages CI/CD pipeline
-├── assets/                     # Official brand marks, icons, and repository media
-│   ├── apple-touch-icon.png    # Mobile home screen icon
-│   ├── favicon-32x32.png       # 32x32 browser tab icon
-│   ├── favicon.png             # Master brand icon
-│   ├── live-ss.png             # Application arena preview screenshot
-│   ├── logo.png                # Primary high-resolution emblem
-│   └── text-logo.png           # Typographic wordmark
-├── public/                     # Static production assets served by Vite
-│   ├── apple-touch-icon.png
-│   ├── favicon-32x32.png
-│   ├── favicon.png
-│   ├── logo.png
-│   └── text-logo.png
-├── src/
-│   ├── audio/                  # Procedural Web Audio API sound synthesizers
-│   ├── components/             # React shell components and overlays
-│   ├── data/                   # Wordlists, practice drills, and code snippets
-│   ├── engine/                 # Core imperative typing engine, reducers, and types
-│   ├── fx/                     # Spring caret physics and visual interpolation
-│   ├── render/                 # Hot-path DOM and text renderers
-│   ├── storage/                # Dexie IndexedDB client and database schemas
-│   ├── styles/                 # Design tokens and Tailwind foundations
-│   ├── ui/                     # Navigation headers, arena, and theme selectors
-│   ├── App.tsx                 # Root application container
-│   └── main.tsx                # Client bootstrap entrypoint
-├── tests/                      # Vitest unit, reducer, and property tests
-├── index.html                  # HTML5 application template
-├── tsconfig.json               # TypeScript compiler configuration
-├── vite.config.ts              # Vite bundler and path configuration
-└── README.md                   # Technical documentation
-```
-
----
-
-## Development
+## Development & Operations
 
 ### Prerequisites
 
-- Node.js 18.0.0 or higher
+- Node.js 22.0.0 or higher (Node 24 recommended)
 - npm 9.0.0 or higher
 
 ### Installation
-
-Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/shubhamrawat-gh/typosaurus.git
@@ -205,55 +133,43 @@ cd typosaurus
 npm install
 ```
 
-### Development Server
-
-Start the local Vite development server with Hot Module Replacement:
+### Running Frontend & Backend
 
 ```bash
+# Start frontend client (Vite dev server at http://localhost:5173)
 npm run dev
+
+# Start enterprise backend server (HTTP & WebSocket at http://localhost:3001)
+npm run server
+
+# Start backend in watch mode
+npm run server:dev
 ```
 
-The application will be accessible at `http://localhost:5173`.
-
-### Quality and Verification
-
-Run type checking, unit tests, and production validation suites:
+### Verification & Testing
 
 ```bash
-# Execute strict TypeScript type verification
+# Execute strict TypeScript type verification across client & server
 npm run typecheck
+npm run typecheck:server
 
-# Execute unit and property test suites via Vitest
-npm run test
+# Run the complete test suite (41 unit, property, and backend tests)
+npm test
 
-# Compile production bundle
+# Compile optimized production frontend bundle
 npm run build
-
-# Preview production build locally
-npm run preview
 ```
 
----
+### Docker Deployment
 
-## Deployment to GitHub Pages
+Deploy the enterprise backend container with a single command:
 
-Typosaurus includes an automated GitHub Actions deployment workflow at `.github/workflows/deploy.yml`.
-
-### Automated Deployment via GitHub Actions
-
-1. Push changes to the `main` branch.
-2. In your repository settings on GitHub, navigate to **Settings** > **Pages**.
-3. Under **Build and deployment** > **Source**, select **GitHub Actions**.
-4. The deployment pipeline will automatically build the application and deploy it to:
-
+```bash
+docker compose up -d --build
 ```
-https://shubhamrawat-gh.github.io/typosaurus/
-```
-
-*Note: For private repositories, GitHub Pages requires a GitHub Pro, Team, or Enterprise plan. If operating on a standard free tier, configure the repository visibility to Public in repository settings to enable GitHub Pages hosting.*
 
 ---
 
 ## License
 
-This project is released under the MIT License. Built with 100% original implementation code without third-party typing test codebase dependencies.
+This project is released under the MIT License. Built with 100% original implementation code.

@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  typosaurus-backend:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: typosaurus-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
+      - TYPOSAURUS_INTEGRITY_SECRET=typosaurus_production_vault_secret_2026
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
