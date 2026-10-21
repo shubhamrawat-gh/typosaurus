@@ -6,8 +6,8 @@
  */
 
 export interface SpringConfig {
-  stiffness: number;    // Angular stiffness k (e.g. 380)
-  damping: number;      // Viscous damping coefficient c (e.g. 32)
+  stiffness: number;    // Angular stiffness k (e.g. 950)
+  damping: number;      // Viscous damping coefficient c (e.g. 62)
   mass: number;         // Inertial mass m (default 1)
   snapDistance: number; // Distance threshold to snap (default 0.15)
   snapVelocity: number; // Velocity threshold to snap (default 0.15)
@@ -15,11 +15,11 @@ export interface SpringConfig {
 }
 
 export const DEFAULT_SPRING_CONFIG: SpringConfig = {
-  stiffness: 420,
-  damping: 36,
+  stiffness: 950,
+  damping: 62,
   mass: 1,
-  snapDistance: 0.1,
-  snapVelocity: 0.1,
+  snapDistance: 0.15,
+  snapVelocity: 0.15,
   adaptive: true,
 };
 
@@ -103,8 +103,18 @@ export class Spring2D {
   public setTarget(targetX: number, targetY: number): void {
     if (this.targetX === targetX && this.targetY === targetY) return;
 
+    const dx = targetX - this.x;
+    const dy = targetY - this.y;
+
     this.targetX = targetX;
     this.targetY = targetY;
+
+    // Forward typing burst on the same line: inject initial velocity towards target
+    // so the spring instantly starts moving on the very first millisecond
+    if (Math.abs(dy) < 6 && Math.abs(dx) > 0 && Math.abs(dx) < 100) {
+      const omega0 = Math.sqrt(this.config.stiffness / this.config.mass);
+      this.vx = dx * (omega0 * 0.7);
+    }
   }
 
   public snapTo(x: number, y: number): void {
@@ -135,9 +145,9 @@ export class Spring2D {
     if (adaptive) {
       const dx = Math.abs(this.targetX - this.x);
       const dy = Math.abs(this.targetY - this.y);
-      if (dy < 6 && dx > 0 && dx < 60) {
-        stiffness = Math.max(stiffness, 520);
-        damping = Math.max(damping, 42);
+      if (dy < 6 && dx > 0 && dx < 80) {
+        stiffness = Math.max(stiffness, 1500);
+        damping = Math.max(damping, 78);
       }
     }
 

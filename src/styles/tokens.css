@@ -150,6 +150,10 @@ body {
 
 .spring-caret {
   box-shadow: none;
+  width: 2px;
+  margin-left: -1px;
+  pointer-events: none;
+  border-radius: 1px;
 }
 
 .word-complete {
@@ -286,7 +290,7 @@ body {
 .results-wpm { color: var(--color-ink); font-family: var(--font-mono); font-size: 68px; font-weight: 500; letter-spacing: -.08em; }
 .next-test-button { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 46px; padding: 0 18px; border-radius: 8px; background: var(--color-primary); color: var(--color-on-primary); font-size: 13px; font-weight: 700; transition: background-color .15s; }
 .next-test-button:hover { background: var(--color-primary-hover); }
-.typing-text-arena { height: 10.9rem; min-height: 10.9rem; max-height: 10.9rem; font-size: clamp(1.55rem, 2.35vw, 2.3rem); line-height: 1.58; letter-spacing: -.015em; mask-image: none; -webkit-mask-image: none; }
+.typing-text-arena { height: 10.9rem; min-height: 10.9rem; max-height: 10.9rem; font-size: clamp(1.55rem, 2.35vw, 2.3rem); line-height: 1.58; letter-spacing: 0; mask-image: none; -webkit-mask-image: none; }
 .words-wrapper { column-gap: .65em !important; row-gap: .23em !important; }
 .is-code-mode .typing-text-arena { height: 12.5rem; min-height: 12.5rem; max-height: 12.5rem; font-size: clamp(1rem, 1.75vw, 1.38rem); line-height: 1.6; }
 .is-code-mode .words-wrapper { flex-direction: column; align-items: flex-start; flex-wrap: nowrap !important; row-gap: .12em !important; }

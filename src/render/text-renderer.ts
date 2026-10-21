@@ -11,6 +11,7 @@ export class TextRenderer {
   private caretSpring: Spring2D = new Spring2D(0, 0);
   private scrollSpring: Spring2D = new Spring2D(0, 0);
   private resizeObserver: ResizeObserver | null = null;
+  private fontListenerCleanups: (() => void)[] = [];
   private schedulerUnsub: (() => void) | null = null;
 
   // Cached DOM references
@@ -35,6 +36,7 @@ export class TextRenderer {
     // Internal words wrapper that can translate for line scrolling
     this.wordsContainer = document.createElement('div');
     this.wordsContainer.className = 'words-wrapper will-change-transform';
+    this.wordsContainer.style.position = 'relative';
     this.wordsContainer.style.transform = 'translate3d(0, 0, 0)';
     this.wordsContainer.style.display = 'flex';
     this.wordsContainer.style.flexWrap = 'wrap';
@@ -45,24 +47,27 @@ export class TextRenderer {
     this.container.appendChild(this.wordsContainer);
 
     // Spring Caret element with dedicated hardware acceleration layer
+    // Centered on character boundary with 2px width and -1px margin
     this.caretElement = document.createElement('div');
     this.caretElement.className = 'spring-caret will-change-transform';
     this.caretElement.style.position = 'absolute';
     this.caretElement.style.top = '0';
     this.caretElement.style.left = '0';
-    this.caretElement.style.width = '2.5px';
-    this.caretElement.style.height = '1.4em';
+    this.caretElement.style.width = '2px';
+    this.caretElement.style.marginLeft = '-1px';
+    this.caretElement.style.height = '1.2em';
     this.caretElement.style.backgroundColor = 'var(--color-caret)';
-    this.caretElement.style.borderRadius = '1px';
+    this.caretElement.style.borderRadius = '1.5px';
     this.caretElement.style.pointerEvents = 'none';
     this.caretElement.style.zIndex = '10';
-    this.caretElement.style.transition = 'opacity 0.2s ease';
+    this.caretElement.style.transition = 'opacity 0.15s ease';
     this.caretElement.style.willChange = 'transform';
     this.caretElement.style.backfaceVisibility = 'hidden';
     this.caretElement.style.perspective = '1000px';
     this.wordsContainer.appendChild(this.caretElement);
 
     this.setupResizeObserver();
+    this.setupFontListener();
     this.attachScheduler();
   }
 
@@ -81,28 +86,7 @@ export class TextRenderer {
     this.lastRenderedStatuses = new Array(len);
 
     for (let w = 0; w < len; w++) {
-      const word = words[w];
-      const wordDiv = document.createElement('div');
-      wordDiv.className = 'word';
-      wordDiv.setAttribute('data-word-idx', String(w));
-      wordDiv.setAttribute('data-line', String(w + 1));
-      wordDiv.style.display = 'inline-flex';
-      wordDiv.style.position = 'relative';
-
-      const chars: HTMLElement[] = new Array(word.length);
-      for (let c = 0; c < word.length; c++) {
-        const charSpan = document.createElement('span');
-        charSpan.className = 'glyph glyph-untyped';
-        charSpan.textContent = word[c];
-        wordDiv.appendChild(charSpan);
-        chars[c] = charSpan;
-      }
-
-      this.wordsContainer.appendChild(wordDiv);
-      this.wordElements[w] = wordDiv;
-      this.charElements[w] = chars;
-      this.extraElements[w] = [];
-      this.lastRenderedStatuses[w] = new Array(word.length).fill('untyped');
+      this.createWordElement(words[w], w);
     }
 
     // Remeasure layout
@@ -113,16 +97,52 @@ export class TextRenderer {
     this.currentCharIndex = 0;
     const initialPos = this.rectCache.getCaretPosition(0, 0);
     if (initialPos) {
-      this.caretSpring.snapTo(initialPos.x, initialPos.y);
-      this.lastCaretHeight = initialPos.height;
-      this.caretElement.style.height = `${initialPos.height}px`;
+      const caretHeight = Math.max(18, Math.round(initialPos.height * 0.74));
+      const caretY = initialPos.y + Math.round((initialPos.height - caretHeight) / 2);
+      this.caretSpring.snapTo(initialPos.x, caretY);
+      this.lastCaretHeight = caretHeight;
+      this.caretElement.style.height = `${caretHeight}px`;
+      this.renderCaret();
     }
+  }
+
+  private createWordElement(word: string, w: number): HTMLElement {
+    const wordDiv = document.createElement('div');
+    wordDiv.className = 'word';
+    wordDiv.setAttribute('data-word-idx', String(w));
+    wordDiv.setAttribute('data-line', String(w + 1));
+    wordDiv.style.display = 'inline-flex';
+    wordDiv.style.position = 'relative';
+
+    const chars: HTMLElement[] = new Array(word.length);
+    for (let c = 0; c < word.length; c++) {
+      const charSpan = document.createElement('span');
+      charSpan.className = 'glyph glyph-untyped';
+      charSpan.textContent = word[c];
+      wordDiv.appendChild(charSpan);
+      chars[c] = charSpan;
+    }
+
+    this.wordsContainer.appendChild(wordDiv);
+    this.wordElements[w] = wordDiv;
+    this.charElements[w] = chars;
+    this.extraElements[w] = [];
+    this.lastRenderedStatuses[w] = new Array(word.length).fill('untyped');
+    return wordDiv;
   }
 
   public remeasureLayout(): void {
     if (this.wordElements.length === 0) return;
     this.rectCache.measure(this.wordsContainer, this.wordElements);
-    this.updateCaretTarget(this.currentWordIndex, this.currentCharIndex);
+    const pos = this.rectCache.getCaretPosition(this.currentWordIndex, this.currentCharIndex);
+    if (pos) {
+      const caretHeight = Math.max(18, Math.round(pos.height * 0.74));
+      const caretY = pos.y + Math.round((pos.height - caretHeight) / 2);
+      this.caretSpring.snapTo(pos.x, caretY);
+      this.lastCaretHeight = caretHeight;
+      this.caretElement.style.height = `${caretHeight}px`;
+      this.renderCaret();
+    }
   }
 
   /**
@@ -131,8 +151,23 @@ export class TextRenderer {
    */
   public update(state: EngineState): void {
     const { currentWordIndex, currentCharIndex, charStatuses, typedWords } = state;
+
+    // Detect if this keystroke is a backspace or word reset
+    const isBackspace =
+      currentWordIndex < this.currentWordIndex ||
+      (currentWordIndex === this.currentWordIndex && currentCharIndex < this.currentCharIndex);
+
     this.currentWordIndex = currentWordIndex;
     this.currentCharIndex = currentCharIndex;
+
+    // Handle dynamic word expansion (e.g. infinite/time modes)
+    if (state.words.length > this.wordElements.length) {
+      const startIdx = this.wordElements.length;
+      for (let w = startIdx; w < state.words.length; w++) {
+        this.createWordElement(state.words[w], w);
+      }
+      this.rectCache.measure(this.wordsContainer, this.wordElements);
+    }
 
     // 1. Update current word's glyphs
     const wordStatuses = charStatuses[currentWordIndex];
@@ -187,21 +222,37 @@ export class TextRenderer {
       }
     }
 
-    // 2. Update caret target
-    this.updateCaretTarget(currentWordIndex, currentCharIndex);
+    // 2. Update caret target with instantaneous responsiveness
+    this.updateCaretTarget(currentWordIndex, currentCharIndex, isBackspace);
   }
 
-  private updateCaretTarget(wordIndex: number, charIndex: number): void {
+  private updateCaretTarget(wordIndex: number, charIndex: number, isBackspace: boolean = false): void {
     const pos = this.rectCache.getCaretPosition(wordIndex, charIndex);
     if (!pos) return;
 
-    this.caretSpring.setTarget(pos.x, pos.y);
+    // Centered vertical height: 74% of line-box height matches font em cleanly
+    const caretHeight = Math.max(18, Math.round(pos.height * 0.74));
+    const caretY = pos.y + Math.round((pos.height - caretHeight) / 2);
+
+    // If backspacing or moving lines, snap immediately for crisp responsiveness
+    const isLineJump = Math.abs(caretY - this.caretSpring.y) > 10;
+
+    if (isLineJump || isBackspace) {
+      this.caretSpring.snapTo(pos.x, caretY);
+    } else {
+      this.caretSpring.setTarget(pos.x, caretY);
+      // Advance by an initial micro-step so the keystroke paint displays immediate live movement
+      this.caretSpring.update(0.016);
+    }
 
     // Avoid redundant style recalculations: only update caret height if changed
-    if (Math.abs(pos.height - this.lastCaretHeight) > 0.5) {
-      this.lastCaretHeight = pos.height;
-      this.caretElement.style.height = `${pos.height}px`;
+    if (Math.abs(caretHeight - this.lastCaretHeight) > 0.5) {
+      this.lastCaretHeight = caretHeight;
+      this.caretElement.style.height = `${caretHeight}px`;
     }
+
+    // Render immediately on the keystroke hot path
+    this.renderCaret();
 
     // 3. Line scroll handling
     // If caret moves beyond line 2 (e.g. y > 60px), smoothly scroll the container up
@@ -214,6 +265,10 @@ export class TextRenderer {
     }
   }
 
+  private renderCaret(): void {
+    this.caretElement.style.transform = `translate3d(${this.caretSpring.x.toFixed(2)}px, ${this.caretSpring.y.toFixed(2)}px, 0)`;
+  }
+
   private attachScheduler(): void {
     this.schedulerUnsub = scheduler.subscribe(
       'text-renderer',
@@ -221,7 +276,7 @@ export class TextRenderer {
         // Step caret spring physics (closed-form analytical evaluation)
         const caretActive = this.caretSpring.update(dtSeconds);
         if (caretActive || this.caretSpring.vx !== 0 || this.caretSpring.vy !== 0) {
-          this.caretElement.style.transform = `translate3d(${this.caretSpring.x.toFixed(2)}px, ${this.caretSpring.y.toFixed(2)}px, 0)`;
+          this.renderCaret();
         }
 
         // Step scroll spring physics
@@ -246,6 +301,22 @@ export class TextRenderer {
     }
   }
 
+  private setupFontListener(): void {
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts.ready.then(() => {
+        this.remeasureLayout();
+      });
+
+      const onLoadingDone = () => {
+        this.remeasureLayout();
+      };
+      document.fonts.addEventListener?.('loadingdone', onLoadingDone);
+      this.fontListenerCleanups.push(() => {
+        document.fonts.removeEventListener?.('loadingdone', onLoadingDone);
+      });
+    }
+  }
+
   public destroy(): void {
     if (this.schedulerUnsub) {
       this.schedulerUnsub();
@@ -255,6 +326,10 @@ export class TextRenderer {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+    for (const cleanup of this.fontListenerCleanups) {
+      cleanup();
+    }
+    this.fontListenerCleanups = [];
     this.container.innerHTML = '';
   }
 }

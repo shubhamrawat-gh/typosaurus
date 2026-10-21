@@ -5,6 +5,7 @@ import { generateWords } from '../src/engine/text-generator';
 import { createInitialState, engineReducer } from '../src/engine/reducer';
 import { calculateMetrics } from '../src/engine/metrics';
 import { Spring2D } from '../src/render/spring';
+import { RectCache } from '../src/render/rect-cache';
 
 describe('Phase 1 - Core Typing Engine & Input Hot Path', () => {
   describe('SeededRNG & Determinism', () => {
@@ -231,6 +232,55 @@ describe('Phase 1 - Core Typing Engine & Input Hot Path', () => {
       expect(spring.y).toBeCloseTo(50, 1);
       expect(spring.vx).toBe(0);
       expect(spring.vy).toBe(0);
+    });
+
+    it('settles within 50ms without lagging behind high-speed typing bursts', () => {
+      const spring = new Spring2D(0, 0);
+      spring.setTarget(20, 0);
+
+      for (let i = 0; i < 3; i++) {
+        spring.update(0.0166);
+      }
+
+      expect(spring.x).toBeGreaterThan(14);
+      expect(spring.x).toBeLessThanOrEqual(20);
+    });
+  });
+
+  describe('RectCache Positioning', () => {
+    it('positions caret at character boundary to prevent text slicing', () => {
+      const cache = new RectCache();
+      const mockContainer = {
+        getBoundingClientRect: () => ({ left: 0, top: 0, width: 800, height: 200 }),
+      } as HTMLElement;
+      const mockChar0 = {
+        getBoundingClientRect: () => ({ left: 10, top: 20, width: 14, height: 36 }),
+      } as HTMLElement;
+      const mockChar1 = {
+        getBoundingClientRect: () => ({ left: 24, top: 20, width: 14, height: 36 }),
+      } as HTMLElement;
+      const mockWordEl = {
+        getBoundingClientRect: () => ({ left: 10, top: 20, width: 28, height: 36 }),
+        querySelectorAll: () => [mockChar0, mockChar1],
+      } as unknown as HTMLElement;
+
+      cache.measure(mockContainer, [mockWordEl]);
+
+      // At start of word: caret at leading edge of char 0
+      const pos0 = cache.getCaretPosition(0, 0);
+      expect(pos0?.x).toBe(10);
+
+      // Between char 0 and char 1: caret at leading edge of char 1
+      const pos1 = cache.getCaretPosition(0, 1);
+      expect(pos1?.x).toBe(24);
+
+      // At end of word: caret at trailing edge of char 1
+      const pos2 = cache.getCaretPosition(0, 2);
+      expect(pos2?.x).toBe(38);
+
+      // Extra character beyond word length
+      const pos3 = cache.getCaretPosition(0, 3);
+      expect(pos3?.x).toBe(52);
     });
   });
 });

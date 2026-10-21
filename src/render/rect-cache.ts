@@ -72,24 +72,28 @@ export class RectCache {
     const word = this.words[wordIndex];
     if (!word) return null;
 
-    if (charIndex === 0) {
-      // Start of word
-      const firstChar = word.charRects[0];
-      return {
-        x: firstChar ? firstChar.x : word.rect.x,
-        y: firstChar ? firstChar.y : word.rect.y,
-        height: firstChar?.height || word.rect.height || 28,
-      };
+    // Within word characters: position at the leading edge of character at `charIndex`
+    // (for charIndex === 0, this is the start of the first glyph; for charIndex > 0,
+    // this is exactly at the left boundary of charIndex, preventing glyph slicing)
+    if (charIndex < word.charRects.length) {
+      const targetChar = word.charRects[charIndex];
+      if (targetChar) {
+        return {
+          x: targetChar.x,
+          y: targetChar.y,
+          height: targetChar.height,
+        };
+      }
     }
 
-    if (charIndex <= word.charRects.length) {
-      // Before or between characters
-      const prevChar = word.charRects[charIndex - 1];
-      if (prevChar) {
+    // Immediately after the last character of the word
+    if (charIndex === word.charRects.length) {
+      const lastChar = word.charRects[word.charRects.length - 1];
+      if (lastChar) {
         return {
-          x: prevChar.x + prevChar.width,
-          y: prevChar.y,
-          height: prevChar.height,
+          x: lastChar.x + lastChar.width,
+          y: lastChar.y,
+          height: lastChar.height,
         };
       }
     }
@@ -97,7 +101,8 @@ export class RectCache {
     // Extra characters typed beyond word length
     const lastChar = word.charRects[word.charRects.length - 1];
     if (lastChar) {
-      const extraOffset = (charIndex - word.charRects.length) * (lastChar.width || 12);
+      const charWidth = lastChar.width || 14;
+      const extraOffset = (charIndex - word.charRects.length) * charWidth;
       return {
         x: lastChar.x + lastChar.width + extraOffset,
         y: lastChar.y,
