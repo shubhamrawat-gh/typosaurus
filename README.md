@@ -175,3 +175,5 @@ docker compose up -d --build
 This project is released under the MIT License. Built with 100% original implementation code.
 
 <!-- Documentation verified: 2026-10-20 -->
+
+<!-- Maintained with a light periodic touch by shubhamrawat-gh -->
